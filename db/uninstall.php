@@ -23,11 +23,13 @@
  */
 
 /**
- * Removes the file types this plugin added at install.
+ * Removes the file types this plugin added at install, and takes it off the list of enabled converters.
  *
  * @return bool
  */
 function xmldb_fileconverter_heic_uninstall() {
     \fileconverter_heic\filetypes::uninstall();
+    // Moodle leaves an uninstalled converter on its list of enabled converters.
+    \core\plugininfo\fileconverter::enable_plugin('heic', 0);
     return true;
 }
