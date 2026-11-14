@@ -26,10 +26,6 @@ use core_files\conversion;
  * blank page. This converter returns a one-page PDF of the photo, the same
  * shape Moodle builds itself for a JPEG submission.
  *
- * Images are converted on this server when its ImageMagick can read HEIC,
- * which is free. The Breakfast cloud conversion service is used only when the
- * server cannot and cloud conversion is switched on. It uses one credit per image.
- *
  * Moodle stores each result against the source file's content, so one image
  * is converted once per target format.
  *
@@ -39,14 +35,8 @@ use core_files\conversion;
  */
 class converter implements \core_files\converter_interface {
 
-    /** @var string Converted on this server. Free. */
-    const ROUTE_LOCAL = 'local';
-
-    /** @var string Converted by the cloud service. One credit. */
-    const ROUTE_CLOUD = 'cloud';
-
     /** @var string[] Source extensions, lower case. */
-    const FROM = ['heic', 'heif'];
+    const FROM = image_converter::EXTENSIONS;
 
     /** @var array<string, string> Target extension => format requested from the conversion server. */
     const TO = [
@@ -66,7 +56,7 @@ class converter implements \core_files\converter_interface {
      * @return bool
      */
     public static function are_requirements_met() {
-        return local_converter::is_available() || api::is_active();
+        return image_converter::is_ready();
     }
 
     /**
@@ -116,7 +106,7 @@ class converter implements \core_files\converter_interface {
         \core_php_time_limit::raise(180);
 
         try {
-            [$image, $route] = $this->convert_image($source, $file->get_filename(), self::TO[$to]);
+            [$image, $route] = image_converter::convert($source, $file->get_filename(), self::TO[$to]);
         } catch (conversion_exception $e) {
             $detail = $e->debuginfo ? " ({$e->debuginfo})" : '';
             return $this->fail($conversion, $e->getMessage() . $detail);
@@ -146,24 +136,6 @@ class converter implements \core_files\converter_interface {
             ->update();
 
         return $this;
-    }
-
-    /**
-     * Converts the image on this server when it can, otherwise in the cloud.
-     *
-     * A server that can convert never uses the cloud, even for a file it fails on.
-     *
-     * @param  string $source   Path to the HEIC file.
-     * @param  string $filename Original file name.
-     * @param  string $format   jpeg or webp.
-     * @return array Image contents, then the route used: self::ROUTE_LOCAL or self::ROUTE_CLOUD.
-     * @throws conversion_exception
-     */
-    protected function convert_image(string $source, string $filename, string $format): array {
-        if (local_converter::is_available()) {
-            return [local_converter::convert($source, $format), self::ROUTE_LOCAL];
-        }
-        return [$this->get_api()->convert($source, $filename, $format), self::ROUTE_CLOUD];
     }
 
     /**
@@ -226,14 +198,5 @@ class converter implements \core_files\converter_interface {
         $pdf->Image('@' . $image, ($pdf->getPageWidth() - $w) / 2, 0, $w, $h);
         $pdf->setPageMark();
         $pdf->Output($dest, 'F');
-    }
-
-    /**
-     * The cloud client.
-     *
-     * @return api
-     */
-    protected function get_api(): api {
-        return new api();
     }
 }

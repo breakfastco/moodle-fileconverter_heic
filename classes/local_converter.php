@@ -45,16 +45,24 @@ class local_converter {
             return false;
         }
 
+        // The cache is shared by every PHP that runs this site. The web server and
+        // cron often run different PHP setups, so never trust it past this check,
+        // and keep one answer per setup.
+        if (!class_exists('\Imagick')) {
+            return false;
+        }
+
         $cache = \cache::make('fileconverter_heic', 'server');
+        $key = 'local' . preg_replace('/[^a-z0-9]/', '', strtolower(PHP_SAPI));
         if (!$fresh) {
-            $cached = $cache->get('local');
+            $cached = $cache->get($key);
             if ($cached === 'yes' || $cached === 'no') {
                 return $cached === 'yes';
             }
         }
 
         $works = self::can_decode_sample();
-        $cache->set('local', $works ? 'yes' : 'no');
+        $cache->set($key, $works ? 'yes' : 'no');
         return $works;
     }
 

@@ -1,8 +1,8 @@
 # HEIC Support for Moodle
 
-`fileconverter_heic` lets teachers view and annotate iPhone photos (.heic and .heif) in the assignment grader.
+`fileconverter_heic` makes iPhone photos (.heic and .heif) work in Moodle.
 
-Moodle has no converter for HEIC. A student who submits a photo straight from an iPhone gives the teacher a blank page in the grader and a file most computers cannot open. This plugin hands Moodle a PDF of the photo, the same thing Moodle builds for a JPEG.
+Moodle has no support for HEIC. A student who submits a photo straight from an iPhone gives the teacher a blank page in the assignment grader and a file most computers cannot open. Forum posts, quiz answers, and course files show a download link where a photo should be.
 
 ## Free on servers that can convert, cloud for the rest
 
@@ -13,11 +13,12 @@ The plugin decides by decoding a sample HEIC image, because many servers list th
 
 ## What it does
 
-- Converts .heic and .heif to PDF for the assignment grader ("Annotate PDF"). Also offers JPG and WebP to any other code that asks Moodle's converter API.
-- Teaches Moodle the .heic and .heif file types, so they count as image files in "Accepted file types".
+- **Converts uploads as they arrive.** A .heic or .heif file becomes a .jpg the moment it is uploaded, before Moodle stores it. This covers everything that uses Moodle's file picker: assignment submissions, quiz essay attachments, forum, glossary and workshop attachments, and files added to a course. The original HEIC is not kept. An upload is never blocked: if the image cannot be converted, the original is stored unchanged.
+- **Fixes HEIC files already in Moodle** for the assignment grader ("Annotate PDF"). As a document converter, it hands Moodle a PDF of the photo, the same thing Moodle builds for a JPEG, and leaves the stored file untouched. It also offers JPG and WebP to any other code that asks Moodle's converter API.
+- **Teaches Moodle the .heic and .heif file types**, so they count as image files in "Accepted file types".
 - Shows the server's ImageMagick version, or the cloud settings and remaining credits when the server cannot convert.
 
-Moodle stores each result against the file's content, so the same image is never converted twice.
+Moodle stores each document-converter result against the file's content, so the same stored image is never converted twice.
 
 ## Requirements
 
