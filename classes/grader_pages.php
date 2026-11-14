@@ -66,22 +66,29 @@ class grader_pages {
             if (!$grade) {
                 continue;
             }
-            // A file here means Moodle could not convert every file in the submission.
-            $partial = $fs->get_file(
-                $contextid,
-                'assignfeedback_editpdf',
-                document_services::PARTIAL_PDF_FILEAREA,
-                $grade->id,
-                '/',
-                document_services::COMBINED_PDF_FILENAME
-            );
-            if (!$partial) {
+            // The grader keeps one set of pages for the grade, and on Moodle 5.0 and later
+            // one more for each marker when an assignment has several.
+            $sets = [[self::areas(), $grade->id]];
+            foreach (self::mark_ids($grade->id) as $markid) {
+                $sets[] = [self::marker_areas(), $markid];
+            }
+            // A partial PDF means Moodle could not convert every file in the submission.
+            $failed = false;
+            foreach ($sets as [$areas, $itemid]) {
+                $filename = document_services::COMBINED_PDF_FILENAME;
+                if ($fs->file_exists($contextid, 'assignfeedback_editpdf', $areas[0], $itemid, '/', $filename)) {
+                    $failed = true;
+                }
+            }
+            if (!$failed) {
                 continue;
             }
             $affected = true;
             if ($apply) {
-                foreach (self::areas() as $area) {
-                    $fs->delete_area_files($contextid, 'assignfeedback_editpdf', $area, $grade->id);
+                foreach ($sets as [$areas, $itemid]) {
+                    foreach ($areas as $area) {
+                        $fs->delete_area_files($contextid, 'assignfeedback_editpdf', $area, $itemid);
+                    }
                 }
             }
         }
@@ -136,7 +143,7 @@ class grader_pages {
     }
 
     /**
-     * The grader's file areas that are rebuilt.
+     * The grader's file areas for a grade that are rebuilt. The partial PDF comes first.
      *
      * @return string[]
      */
@@ -147,5 +154,29 @@ class grader_pages {
             document_services::PAGE_IMAGE_FILEAREA,
             document_services::PAGE_IMAGE_READONLY_FILEAREA,
         ];
+    }
+
+    /**
+     * The grader's file areas for one marker's copy. The partial PDF comes first. Moodle 5.0 and later.
+     *
+     * @return string[]
+     */
+    protected static function marker_areas(): array {
+        return ['partial_marker', 'combined_marker', 'pages_marker'];
+    }
+
+    /**
+     * Ids of the marks several markers gave a grade. Empty before Moodle 5.0.
+     *
+     * @param  int $gradeid The grade.
+     * @return int[]
+     */
+    protected static function mark_ids(int $gradeid): array {
+        global $DB;
+
+        if (!defined(document_services::class . '::PARTIAL_PDF_FILEAREA_MARKER')) {
+            return [];
+        }
+        return array_map('intval', $DB->get_fieldset_select('assign_mark', 'id', 'gradeid = ?', [$gradeid]));
     }
 }
