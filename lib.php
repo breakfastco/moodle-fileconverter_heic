@@ -23,14 +23,14 @@
  */
 
 /**
- * Adds "Convert HEIC images" to the course's More menu for people who may convert.
+ * Adds "Convert HEIC images" to the course's More menu for people who may edit something in it.
  *
  * @param navigation_node $navigation The course node.
  * @param stdClass        $course     The course.
  * @param context         $context    The course context.
  */
 function fileconverter_heic_extend_navigation_course($navigation, $course, $context) {
-    if (!has_capability('fileconverter/heic:convert', $context)) {
+    if (!\fileconverter_heic\stored_images::may_convert_any($context)) {
         return;
     }
     if (!\fileconverter_heic\image_converter::is_ready()) {

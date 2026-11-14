@@ -128,10 +128,11 @@ class hook_listener {
         if (!$context instanceof \context_module || str_starts_with($PAGE->pagetype, 'files-converter-heic')) {
             return;
         }
-        if (!has_capability('fileconverter/heic:convert', $context) || !image_converter::is_ready()) {
+        if (!image_converter::is_ready()) {
             return;
         }
-        $count = stored_images::count_in($context);
+        // Only images this person is already allowed to change.
+        $count = count(stored_images::find($context));
         if (!$count) {
             return;
         }

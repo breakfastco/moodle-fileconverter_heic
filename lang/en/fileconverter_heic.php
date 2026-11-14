@@ -59,7 +59,6 @@ $string['error_serverunreachable'] = 'Could not reach the conversion server.';
 $string['error_storeunreachable'] = 'Could not reach the license server.';
 $string['error_unsupported'] = 'This converter only converts .heic and .heif images.';
 $string['eventimageconverted'] = 'HEIC image converted';
-$string['heic:convert'] = 'Convert HEIC images';
 $string['imagemagick'] = 'ImageMagick';
 $string['intro'] = 'Control how .heic images are handled during uploads.';
 $string['licensekey'] = 'License key';

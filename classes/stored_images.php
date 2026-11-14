@@ -73,13 +73,15 @@ class stored_images {
         $allowed = [];
         $files = [];
         foreach ($records as $record) {
-            if (!isset($allowed[$record->contextid])) {
-                $allowed[$record->contextid] = has_capability(
-                    'fileconverter/heic:convert',
-                    \context::instance_by_id($record->contextid)
-                );
+            $capability = self::capability_for($record);
+            if ($capability === null) {
+                continue;
             }
-            if ($allowed[$record->contextid]) {
+            $key = $record->contextid . ':' . $capability;
+            if (!isset($allowed[$key])) {
+                $allowed[$key] = has_capability($capability, \context::instance_by_id($record->contextid));
+            }
+            if ($allowed[$key]) {
                 $files[$record->id] = $fs->get_file_instance($record);
             }
         }
@@ -87,19 +89,73 @@ class stored_images {
     }
 
     /**
-     * How many HEIC images are stored directly in one context. Ignores permissions.
+     * The Moodle permission that already lets someone change this file. Null when nobody but its owner may.
      *
-     * @param  \context $context The context.
-     * @return int
+     * Converting replaces the file, so it takes the same permission as editing
+     * the thing the file belongs to.
+     *
+     * @param  \stdClass $record A files table record.
+     * @return string|null Capability name.
      */
-    public static function count_in(\context $context): int {
-        global $DB;
+    public static function capability_for(\stdClass $record): ?string {
+        $context = \context::instance_by_id($record->contextid, IGNORE_MISSING);
+        if (!$context) {
+            return null;
+        }
+        $component = $record->component;
+        $area = $record->filearea;
 
-        [$where, $params] = self::where();
-        return (int) $DB->count_records_sql(
-            "SELECT COUNT(1) FROM {files} f WHERE f.contextid = :contextid AND {$where}",
-            ['contextid' => $context->id] + $params
-        );
+        // Files people submitted or posted: the permission to edit someone else's.
+        if (str_starts_with($component, 'assignsubmission_')) {
+            return 'mod/assign:editothersubmission';
+        }
+        if ($component === 'mod_forum' && in_array($area, ['attachment', 'post'], true)) {
+            return 'mod/forum:editanypost';
+        }
+        if ($component === 'mod_glossary' && in_array($area, ['attachment', 'entry'], true)) {
+            return 'mod/glossary:manageentries';
+        }
+        if ($component === 'mod_data' && $area === 'content') {
+            return 'mod/data:manageentries';
+        }
+        // Moodle lets nobody edit a quiz attempt or someone else's workshop submission.
+        if ($component === 'question' && str_starts_with($area, 'response_')) {
+            return null;
+        }
+        if ($component === 'mod_workshop' && !in_array($area, ['intro', 'instructauthors', 'instructreviewers', 'conclusion'], true)) {
+            return null;
+        }
+        if ($component === 'question') {
+            return 'moodle/question:editall';
+        }
+
+        // Everything else is the course's or activity's own content: the permission to edit it.
+        if ($context instanceof \context_module) {
+            return 'moodle/course:manageactivities';
+        }
+        if ($context instanceof \context_block) {
+            return 'moodle/block:edit';
+        }
+        return 'moodle/course:update';
+    }
+
+    /**
+     * Whether the current user holds any permission that lets them convert something in a course.
+     *
+     * A quick check for showing the way in. The page itself checks each file.
+     *
+     * @param  \context $context The course context.
+     * @return bool
+     */
+    public static function may_convert_any(\context $context): bool {
+        return has_any_capability([
+            'moodle/course:update',
+            'moodle/course:manageactivities',
+            'mod/assign:editothersubmission',
+            'mod/forum:editanypost',
+            'mod/glossary:manageentries',
+            'mod/data:manageentries',
+        ], $context);
     }
 
     /**

@@ -39,9 +39,21 @@ The converter is enabled at install. It stays idle only when the server cannot c
 
 ## Permissions
 
-Converting stored images needs the capability `fileconverter/heic:convert` (Convert HEIC images) in the course or activity. By default editing teachers and managers have it; non-editing teachers and students do not. Because converting replaces the original file, the capability is marked as a data loss risk. Every conversion is logged with who converted which file.
+HEIC Support adds no permissions of its own. Converting a stored image replaces it, so it takes the permission Moodle already uses to edit the thing the image belongs to:
 
-Converting uploads as they arrive needs no extra permission: it applies to whatever the person was already allowed to upload.
+| Where the image is | Permission |
+| --- | --- |
+| Assignment submission | Edit another user's submission (`mod/assign:editothersubmission`). Moodle gives this to managers only by default. |
+| Forum post | Edit any post (`mod/forum:editanypost`) |
+| Glossary entry | Manage entries (`mod/glossary:manageentries`) |
+| Database entry | Manage entries (`mod/data:manageentries`) |
+| Quiz answer, workshop submission | Nobody. Moodle lets nobody edit these after they are submitted. |
+| An activity's own content, such as a page or file | Manage activities (`moodle/course:manageactivities`) |
+| Course summary or section | Update course settings (`moodle/course:update`) |
+
+Teachers who can't convert an assignment submission still see its photo in the assignment grader, which shows a converted copy and never changes the student's file.
+
+Converting uploads as they arrive needs no extra permission: it applies to whatever the person was already allowed to upload. Every conversion of a stored image is logged with who converted which file.
 
 After converting, browsers that recently tried to show the old HEIC may keep showing it broken for up to six hours, Moodle's cache time for files.
 

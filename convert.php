@@ -45,7 +45,7 @@ if ($context instanceof context_module) {
 } else {
     throw new moodle_exception('invalidcontext');
 }
-require_capability('fileconverter/heic:convert', $context);
+// Each file is checked against the permission that already lets someone edit it. See stored_images::find().
 
 $url = new moodle_url('/files/converter/heic/convert.php', ['contextid' => $context->id]);
 $PAGE->set_url($url);
