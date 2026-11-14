@@ -33,7 +33,7 @@ require(__DIR__ . '/../../../../config.php');
 require_once($CFG->libdir . '/clilib.php');
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
-use assignfeedback_editpdf\document_services;
+use fileconverter_heic\grader_pages;
 
 [$options, $unrecognised] = cli_get_params(['run' => false, 'help' => false], ['h' => 'help']);
 
@@ -57,7 +57,7 @@ Example:
     exit(0);
 }
 
-if (!class_exists(document_services::class)) {
+if (!grader_pages::available()) {
     cli_error('The assignment "Annotate PDF" feedback plugin is not installed.');
 }
 
@@ -74,13 +74,6 @@ $submissionids = $DB->get_fieldset_sql($sql, [
     'heif' => '%.heif',
 ]);
 
-$fs = get_file_storage();
-$areas = [
-    document_services::PARTIAL_PDF_FILEAREA,
-    document_services::COMBINED_PDF_FILEAREA,
-    document_services::PAGE_IMAGE_FILEAREA,
-    document_services::PAGE_IMAGE_READONLY_FILEAREA,
-];
 $found = 0;
 
 foreach ($submissionids as $submissionid) {
@@ -95,52 +88,12 @@ foreach ($submissionids as $submissionid) {
     $context = context_module::instance($cm->id);
     $assign = new assign($context, null, null);
 
-    if ($submission->userid) {
-        $userids = [$submission->userid];
-    } else {
-        $userids = array_column($assign->get_submission_group_members($submission->groupid, true), 'id');
-    }
-
-    $affected = false;
-    foreach ($userids as $userid) {
-        $grade = $assign->get_user_grade($userid, false, $submission->attemptnumber);
-        if (!$grade) {
-            continue;
-        }
-        // A file here means Moodle could not convert every file in the submission.
-        $partial = $fs->get_file(
-            $context->id,
-            'assignfeedback_editpdf',
-            document_services::PARTIAL_PDF_FILEAREA,
-            $grade->id,
-            '/',
-            document_services::COMBINED_PDF_FILENAME
-        );
-        if (!$partial) {
-            continue;
-        }
-        $affected = true;
-        if ($options['run']) {
-            foreach ($areas as $area) {
-                $fs->delete_area_files($context->id, 'assignfeedback_editpdf', $area, $grade->id);
-            }
-        }
-    }
-    if (!$affected) {
+    if (!grader_pages::rebuild_if_failed($assign, $submission, (bool) $options['run'])) {
         continue;
     }
 
     $found++;
     cli_writeln("Submission {$submission->id}: " . format_string($assign->get_instance()->name));
-
-    if ($options['run']) {
-        $task = new \assignfeedback_editpdf\task\convert_submission();
-        $task->set_custom_data([
-            'submissionid' => $submission->id,
-            'submissionattempt' => $submission->attemptnumber,
-        ]);
-        \core\task\manager::queue_adhoc_task($task, true);
-    }
 }
 
 if ($options['run']) {
