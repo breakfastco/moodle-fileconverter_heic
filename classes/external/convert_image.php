@@ -32,7 +32,6 @@ use fileconverter_heic\stored_images;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class convert_image extends external_api {
-
     /**
      * Parameters.
      *

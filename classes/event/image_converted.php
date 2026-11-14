@@ -31,7 +31,6 @@ namespace fileconverter_heic\event;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class image_converted extends \core\event\base {
-
     /**
      * Sets the basic properties.
      */

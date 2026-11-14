@@ -30,7 +30,6 @@ namespace fileconverter_heic;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class image_converter {
-
     /** @var string Converted on this server. Free. */
     const ROUTE_LOCAL = 'local';
 

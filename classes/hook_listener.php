@@ -31,7 +31,6 @@ use core_files\hook\before_file_created;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class hook_listener {
-
     /**
      * Swaps a HEIC upload for a JPEG before Moodle stores it.
      *
@@ -69,7 +68,8 @@ class hook_listener {
             debugging('fileconverter_heic: ' . $e->getMessage() . $detail, DEBUG_NORMAL);
             if (self::picker_wants_web_images_only()) {
                 // An unconverted HEIC is a broken image here. Refuse it, as Moodle does without this plugin.
-                throw new \moodle_exception('invalidfiletype', 'repository', '', get_mimetype_description(['filename' => $record->filename]));
+                $type = get_mimetype_description(['filename' => $record->filename]);
+                throw new \moodle_exception('invalidfiletype', 'repository', '', $type);
             }
             return;
         }

@@ -33,7 +33,6 @@ namespace fileconverter_heic;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class filetypes {
-
     /** @var array<string, string> Extension => MIME type. */
     const TYPES = ['heic' => 'image/heic', 'heif' => 'image/heif'];
 

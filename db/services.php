@@ -27,7 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 $functions = [
     'fileconverter_heic_convert_image' => [
         'classname' => \fileconverter_heic\external\convert_image::class,
-        'description' => 'Converts one stored .heic or .heif image to .jpg. Takes the permission that already lets the user edit what the image belongs to.',
+        'description' => 'Converts one stored .heic or .heif image to .jpg. Takes the permission that already lets '
+            . 'the user edit what the image belongs to.',
         'type' => 'write',
         'ajax' => true,
         'loginrequired' => true,

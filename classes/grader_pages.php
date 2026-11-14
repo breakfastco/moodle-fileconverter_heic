@@ -30,7 +30,6 @@ use assignfeedback_editpdf\document_services;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class grader_pages {
-
     /**
      * Whether the assignment "Annotate PDF" feedback plugin is installed.
      *

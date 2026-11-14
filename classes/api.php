@@ -33,7 +33,6 @@ require_once($CFG->libdir . '/filelib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class api {
-
     /** @var string Where credits are counted. */
     const DEFAULT_STORE_URL = 'https://breakfastco.xyz';
 

@@ -28,7 +28,6 @@ namespace fileconverter_heic;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class local_converter {
-
     /** @var string[] Formats this converter writes, named as the cloud service names them. */
     const FORMATS = ['jpeg', 'webp'];
 

@@ -28,7 +28,6 @@ namespace fileconverter_heic;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class stored_images {
-
     /**
      * Areas where a file is listed by name and nothing else refers to it, so
      * the converted file can be renamed to .jpg. Everywhere else, such as text
@@ -98,8 +97,10 @@ class stored_images {
         global $DB;
 
         [$where, $params] = self::where();
-        $record = $DB->get_record_sql("SELECT f.* FROM {files} f WHERE f.id = :fileid AND {$where}",
-            ['fileid' => $fileid] + $params);
+        $record = $DB->get_record_sql(
+            "SELECT f.* FROM {files} f WHERE f.id = :fileid AND {$where}",
+            ['fileid' => $fileid] + $params
+        );
         if (!$record) {
             return null;
         }
@@ -144,7 +145,8 @@ class stored_images {
         if ($component === 'question' && str_starts_with($area, 'response_')) {
             return null;
         }
-        if ($component === 'mod_workshop' && !in_array($area, ['intro', 'instructauthors', 'instructreviewers', 'conclusion'], true)) {
+        $workshopown = ['intro', 'instructauthors', 'instructreviewers', 'conclusion'];
+        if ($component === 'mod_workshop' && !in_array($area, $workshopown, true)) {
             return null;
         }
         if ($component === 'question') {
@@ -249,8 +251,16 @@ class stored_images {
         $fs = get_file_storage();
         $name = $base . '.jpg';
         $count = 1;
-        while ($fs->file_exists($file->get_contextid(), $file->get_component(), $file->get_filearea(),
-                $file->get_itemid(), $file->get_filepath(), $name)) {
+        while (
+            $fs->file_exists(
+                $file->get_contextid(),
+                $file->get_component(),
+                $file->get_filearea(),
+                $file->get_itemid(),
+                $file->get_filepath(),
+                $name
+            )
+        ) {
             $name = "{$base} ({$count}).jpg";
             $count++;
         }
