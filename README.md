@@ -24,7 +24,7 @@ Moodle stores each document-converter result against the file's content, so the 
 
 ## Requirements
 
-- Moodle 4.5 or later. Tested on Moodle 4.5.16 and 5.3.1.
+- Moodle 4.5 or later. Tested on Moodle 4.5.16 and 5.3.1, with PostgreSQL 17 and MySQL 8.4.
 - Either PHP Imagick with HEIC support on the Moodle server, or a license key with conversion credits.
 - Ghostscript configured in Moodle, as the assignment grader already requires.
 - For cloud conversion only: outbound HTTPS from the Moodle server to `breakfastco.xyz` and `heic.breakfastco.xyz`.
