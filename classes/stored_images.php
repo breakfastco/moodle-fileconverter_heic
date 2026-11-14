@@ -162,25 +162,6 @@ class stored_images {
     }
 
     /**
-     * Whether the current user holds any permission that lets them convert something in a course.
-     *
-     * A quick check for showing the way in. The page itself checks each file.
-     *
-     * @param  \context $context The course context.
-     * @return bool
-     */
-    public static function may_convert_any(\context $context): bool {
-        return has_any_capability([
-            'moodle/course:update',
-            'moodle/course:manageactivities',
-            'mod/assign:editothersubmission',
-            'mod/forum:editanypost',
-            'mod/glossary:manageentries',
-            'mod/data:manageentries',
-        ], $context);
-    }
-
-    /**
      * SQL that picks out unconverted HEIC images in the files table, aliased f.
      *
      * @return array SQL, then its parameters.
