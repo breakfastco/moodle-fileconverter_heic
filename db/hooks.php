@@ -33,6 +33,6 @@ $callbacks = [
     ],
     [
         'hook' => \core\hook\output\before_http_headers::class,
-        'callback' => [\fileconverter_heic\hook_listener::class, 'activity_notice'],
+        'callback' => [\fileconverter_heic\hook_listener::class, 'inline_convert'],
     ],
 ];

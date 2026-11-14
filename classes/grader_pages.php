@@ -94,6 +94,35 @@ class grader_pages {
     }
 
     /**
+     * Gives the grader a fresh start on the submissions these converted files belong to.
+     *
+     * @param \stored_file[] $files Files just converted.
+     */
+    public static function after_converted(array $files): void {
+        global $CFG, $DB;
+
+        if (!self::available()) {
+            return;
+        }
+        $submissions = [];
+        foreach ($files as $file) {
+            if ($file->get_component() === 'assignsubmission_file') {
+                $submissions[$file->get_itemid()] = $file->get_contextid();
+            }
+        }
+        if (!$submissions) {
+            return;
+        }
+        require_once($CFG->dirroot . '/mod/assign/locallib.php');
+        foreach ($submissions as $submissionid => $contextid) {
+            $submission = $DB->get_record('assign_submission', ['id' => $submissionid]);
+            if ($submission) {
+                self::rebuild_if_failed(new \assign(\context::instance_by_id($contextid), null, null), $submission);
+            }
+        }
+    }
+
+    /**
      * Queues a submission for cron to build its grader pages.
      *
      * @param \stdClass $submission The submission record.

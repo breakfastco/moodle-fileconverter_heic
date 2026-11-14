@@ -24,7 +24,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['activitynotice'] = '{$a->count} .heic image(s) in this activity can\'t be opened in most browsers. <a href="{$a->url}">Convert them to .jpg</a>';
 $string['cachedef_credits'] = 'License status and remaining conversion credits';
 $string['cachedef_server'] = 'Whether this server can convert HEIC images itself';
 $string['cantconvert'] = 'Conversion';
@@ -41,6 +40,9 @@ $string['convertall'] = 'Convert all ({$a})';
 $string['convertcredits'] = 'Each image uses one conversion credit.';
 $string['converted'] = 'Converted {$a} image(s).';
 $string['convertfailed'] = 'Could not convert {$a->filename}: {$a->error}';
+$string['converting'] = 'Converting…';
+$string['convertinline'] = 'Convert to .jpg';
+$string['convertinlinedone'] = 'Converted to .jpg.';
 $string['convertintro'] = 'These photos were uploaded as .heic files, which most browsers and computers can\'t open. Converting replaces each one with a .jpg. The original .heic files are not kept.';
 $string['convertnone'] = 'There are no .heic images to convert here.';
 $string['convertpage'] = 'Convert HEIC images';

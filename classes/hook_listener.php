@@ -110,37 +110,39 @@ class hook_listener {
     }
 
     /**
-     * Tells people who may convert that an activity holds HEIC images, on that activity's pages.
+     * Puts a Convert to .jpg button beside each HEIC image and file link that the viewer may convert.
+     *
+     * Runs on every page in a course or activity. The script finds where the page
+     * shows each file, so it works in any activity without knowing its markup.
      *
      * @param \core\hook\output\before_http_headers $hook The page about to be sent.
      */
-    public static function activity_notice(\core\hook\output\before_http_headers $hook): void {
+    public static function inline_convert(\core\hook\output\before_http_headers $hook): void {
         global $PAGE;
 
         if (during_initial_install() || !isloggedin() || isguestuser() || CLI_SCRIPT || AJAX_SCRIPT) {
             return;
         }
-        // Only full pages that show notices. Anything else would carry it to the next page.
-        if (!in_array($PAGE->pagelayout, ['incourse', 'standard', 'report', 'admin'], true)) {
-            return;
-        }
         $context = $PAGE->context;
-        if (!$context instanceof \context_module || str_starts_with($PAGE->pagetype, 'files-converter-heic')) {
+        if (!$context instanceof \context_module && !$context instanceof \context_course) {
             return;
         }
         if (!image_converter::is_ready()) {
             return;
         }
         // Only images this person is already allowed to change.
-        $count = count(stored_images::find($context));
-        if (!$count) {
+        $files = stored_images::find($context);
+        if (!$files) {
             return;
         }
-        $url = new \moodle_url('/files/converter/heic/convert.php', ['contextid' => $context->id]);
-        \core\notification::info(get_string('activitynotice', 'fileconverter_heic', (object) [
-            'count' => $count,
-            'url' => $url->out(),
-        ]));
+        $PAGE->requires->js_call_amd('fileconverter_heic/inline', 'init', [array_values(array_map(fn(\stored_file $file) => [
+            'id' => (int) $file->get_id(),
+            'contextid' => (int) $file->get_contextid(),
+            'component' => $file->get_component(),
+            'filearea' => $file->get_filearea(),
+            'filepath' => $file->get_filepath(),
+            'filename' => $file->get_filename(),
+        ], $files))]);
     }
 
     /**

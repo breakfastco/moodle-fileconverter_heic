@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'fileconverter_heic';
-$plugin->version   = 2026111306;
+$plugin->version   = 2026111307;
 $plugin->requires  = 2024100700; // Moodle 4.5.
 $plugin->maturity  = MATURITY_ALPHA;
 $plugin->release   = '0.1.0';

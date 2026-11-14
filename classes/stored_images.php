@@ -89,6 +89,28 @@ class stored_images {
     }
 
     /**
+     * One HEIC image, if it is unconverted and the current user may convert it.
+     *
+     * @param  int $fileid Stored file id.
+     * @return \stored_file|null
+     */
+    public static function convertible(int $fileid): ?\stored_file {
+        global $DB;
+
+        [$where, $params] = self::where();
+        $record = $DB->get_record_sql("SELECT f.* FROM {files} f WHERE f.id = :fileid AND {$where}",
+            ['fileid' => $fileid] + $params);
+        if (!$record) {
+            return null;
+        }
+        $capability = self::capability_for($record);
+        if ($capability === null || !has_capability($capability, \context::instance_by_id($record->contextid))) {
+            return null;
+        }
+        return get_file_storage()->get_file_instance($record);
+    }
+
+    /**
      * The Moodle permission that already lets someone change this file. Null when nobody but its owner may.
      *
      * Converting replaces the file, so it takes the same permission as editing

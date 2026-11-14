@@ -70,17 +70,14 @@ if (($fileid || $all) && confirm_sesskey()) {
     $progress = new \core\output\progress_bar('fileconverter_heic_progress', 500, true);
     $done = 0;
     $failed = [];
-    $submissions = [];
+    $converted = [];
     $count = 0;
     foreach ($chosen as $file) {
         $progress->update($count, count($chosen), s($file->get_filename()));
         $count++;
         try {
-            stored_images::convert($file);
+            $converted[] = stored_images::convert($file);
             $done++;
-            if ($file->get_component() === 'assignsubmission_file') {
-                $submissions[$file->get_itemid()] = $file->get_contextid();
-            }
         } catch (moodle_exception $e) {
             $failed[] = get_string('convertfailed', 'fileconverter_heic', (object) [
                 'filename' => $file->get_filename(),
@@ -91,16 +88,7 @@ if (($fileid || $all) && confirm_sesskey()) {
     $progress->update_full(100, get_string('converted', 'fileconverter_heic', $done));
 
     // Give the assignment grader a fresh start on submissions it showed blank.
-    if ($submissions && grader_pages::available()) {
-        require_once($CFG->dirroot . '/mod/assign/locallib.php');
-        foreach ($submissions as $submissionid => $filecontextid) {
-            $submission = $DB->get_record('assign_submission', ['id' => $submissionid]);
-            if ($submission) {
-                $assign = new assign(context::instance_by_id($filecontextid), null, null);
-                grader_pages::rebuild_if_failed($assign, $submission);
-            }
-        }
-    }
+    grader_pages::after_converted($converted);
 
     foreach ($failed as $message) {
         echo $OUTPUT->notification(s($message), \core\output\notification::NOTIFY_ERROR);
