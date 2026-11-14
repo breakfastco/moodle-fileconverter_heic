@@ -119,6 +119,11 @@ class local_converter {
             $imagick->readImage($path);
             // A HEIC file can hold several images. The first is the photo.
             $imagick->setFirstIterator();
+            if ($format === 'jpeg' && $imagick->getImageAlphaChannel()) {
+                // A .jpg cannot be transparent. Without a white background, transparent areas turn black.
+                $imagick->setImageBackgroundColor('white');
+                $imagick->setImageAlphaChannel(\Imagick::ALPHACHANNEL_REMOVE);
+            }
             $imagick->setImageFormat($format);
             $blob = $imagick->getImageBlob();
             $imagick->clear();
