@@ -35,8 +35,8 @@ class hook_listener {
     /**
      * Swaps a HEIC upload for a JPEG before Moodle stores it.
      *
-     * The upload is never blocked. If the image cannot be converted, the
-     * original file is stored unchanged.
+     * If the image cannot be converted, the original file is stored unchanged.
+     * The one exception is a picker that takes web images only, which refuses it.
      *
      * @param before_file_created $hook The file about to be stored.
      */
@@ -67,6 +67,10 @@ class hook_listener {
         } catch (conversion_exception $e) {
             $detail = $e->debuginfo ? " ({$e->debuginfo})" : '';
             debugging('fileconverter_heic: ' . $e->getMessage() . $detail, DEBUG_NORMAL);
+            if (self::picker_wants_web_images_only()) {
+                // An unconverted HEIC is a broken image here. Refuse it, as Moodle does without this plugin.
+                throw new \moodle_exception('invalidfiletype', 'repository', '', get_mimetype_description(['filename' => $record->filename]));
+            }
             return;
         }
 
@@ -78,8 +82,31 @@ class hook_listener {
             $hook->update_filecontent($image);
         }
 
-        $record->filename = self::unused_filename($record, pathinfo($record->filename, PATHINFO_FILENAME));
         $record->mimetype = 'image/jpeg';
+
+        // The text editor links to an uploaded image by the name it was sent with,
+        // and nothing after this point can tell it about a new name. Keep the name
+        // there. The file is a JPEG, is stored as a JPEG, and is served as one.
+        if (optional_param('env', '', PARAM_ALPHA) === 'editor') {
+            return;
+        }
+        $record->filename = self::unused_filename($record, pathinfo($record->filename, PATHINFO_FILENAME));
+    }
+
+    /**
+     * Whether the file picker behind this upload accepts web images and nothing else.
+     *
+     * True for the image button in the text editor, profile pictures, and course images.
+     *
+     * @return bool
+     */
+    protected static function picker_wants_web_images_only(): bool {
+        $accepted = optional_param_array('accepted_types', [], PARAM_RAW);
+        if (!$accepted || in_array('*', $accepted, true)) {
+            return false;
+        }
+        $accepted = array_map('strtolower', $accepted);
+        return !array_diff($accepted, file_get_typegroup('extension', 'web_image'));
     }
 
     /**

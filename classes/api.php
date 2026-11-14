@@ -265,6 +265,14 @@ class api {
     }
 
     /**
+     * Runs when the license key or the cloud conversion switch is saved.
+     */
+    public static function settings_updated(): void {
+        self::purge_status();
+        filetypes::sync();
+    }
+
+    /**
      * HTTP client. Moodle's wrapper honours the site's proxy and blocked-host settings.
      *
      * @return \curl

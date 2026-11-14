@@ -13,8 +13,9 @@ The plugin decides by decoding a sample HEIC image, because many servers list th
 
 ## What it does
 
-- **Converts uploads as they arrive.** A .heic or .heif file becomes a .jpg the moment it is uploaded, before Moodle stores it. This covers everything that uses Moodle's file picker: assignment submissions, quiz essay attachments, forum, glossary and workshop attachments, and files added to a course. The original HEIC is not kept. An upload is never blocked: if the image cannot be converted, the original is stored unchanged.
+- **Converts uploads as they arrive.** A .heic or .heif file becomes a .jpg the moment it is uploaded, before Moodle stores it. This covers everything that uses Moodle's file picker: assignment submissions, quiz essay attachments, forum, glossary and workshop attachments, and files added to a course. The original HEIC is not kept. If the image cannot be converted, the original is stored unchanged.
 - **Fixes HEIC files already in Moodle** for the assignment grader ("Annotate PDF"). As a document converter, it hands Moodle a PDF of the photo, the same thing Moodle builds for a JPEG, and leaves the stored file untouched. It also offers JPG and WebP to any other code that asks Moodle's converter API.
+- **Opens the image-only upload points to HEIC.** The image button in the text editor, profile pictures, course images, and database picture fields refuse HEIC in plain Moodle. While this site can convert, they accept it and store a JPEG. If a conversion fails there, the upload is refused, as it would be without the plugin. An image added through the text editor keeps its .heic name, because the editor links to it by that name; the file itself is a JPEG and is served as one.
 - **Teaches Moodle the .heic and .heif file types**, so they count as image files in "Accepted file types".
 - Shows the server's ImageMagick version, or the cloud settings and remaining credits when the server cannot convert.
 

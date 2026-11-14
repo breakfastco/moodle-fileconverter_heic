@@ -52,7 +52,12 @@ class local_converter {
             return false;
         }
 
-        $cache = \cache::make('fileconverter_heic', 'server');
+        try {
+            $cache = \cache::make('fileconverter_heic', 'server');
+        } catch (\Throwable $e) {
+            // The cache is not defined yet while the plugin is being installed.
+            return self::can_decode_sample();
+        }
         $key = 'local' . preg_replace('/[^a-z0-9]/', '', strtolower(PHP_SAPI));
         if (!$fresh) {
             $cached = $cache->get($key);

@@ -28,12 +28,6 @@
  * @return bool
  */
 function xmldb_fileconverter_heic_uninstall() {
-    $added = array_filter(explode(',', (string) get_config('fileconverter_heic', 'addedfiletypes')));
-    $known = core_filetypes::get_types();
-    foreach ($added as $extension) {
-        if (array_key_exists($extension, $known)) {
-            core_filetypes::delete_type($extension);
-        }
-    }
+    \fileconverter_heic\filetypes::uninstall();
     return true;
 }

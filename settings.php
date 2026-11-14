@@ -35,6 +35,9 @@ if ($hassiteconfig) {
 
     // Test the server again whenever this page is on screen, so the answer follows server changes.
     $local = local_converter::is_available($onscreen);
+    if ($onscreen) {
+        \fileconverter_heic\filetypes::sync();
+    }
 
     $settings->add(new admin_setting_heading(
         'fileconverter_heic/intro',
@@ -66,15 +69,17 @@ if ($hassiteconfig) {
             get_string('licensekey_desc', 'fileconverter_heic'),
             ''
         );
-        $licensekey->set_updatedcallback('\fileconverter_heic\api::purge_status');
+        $licensekey->set_updatedcallback('\fileconverter_heic\api::settings_updated');
         $settings->add($licensekey);
 
-        $settings->add(new admin_setting_configcheckbox(
+        $cloudenabled = new admin_setting_configcheckbox(
             'fileconverter_heic/cloudenabled',
             get_string('cloudenabled', 'fileconverter_heic'),
             get_string('cloudenabled_label', 'fileconverter_heic') . ' ' . get_string('cloudenabled_desc', 'fileconverter_heic'),
             0
-        ));
+        );
+        $cloudenabled->set_updatedcallback('\fileconverter_heic\api::settings_updated');
+        $settings->add($cloudenabled);
 
         // Ask the license server only when this page itself is on screen, not for every admin page or search.
         if ($onscreen && api::license_key() !== '') {

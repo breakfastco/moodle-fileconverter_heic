@@ -24,24 +24,11 @@
 
 /**
  * Teaches Moodle the .heic and .heif file types and enables the converter.
- *
- * Moodle core has no entry for these extensions, so uploads are stored as
- * "document/unknown" and are rejected by activities that accept image files only.
  */
 function xmldb_fileconverter_heic_install() {
-    $known = core_filetypes::get_types();
-    $added = [];
-    foreach (['heic' => 'image/heic', 'heif' => 'image/heif'] as $extension => $mimetype) {
-        if (array_key_exists($extension, $known)) {
-            continue;
-        }
-        core_filetypes::add_type($extension, $mimetype, 'image', ['image'], '', 'HEIC image');
-        $added[] = $extension;
-    }
-    // Remembered so uninstalling removes only the types this plugin added.
-    set_config('addedfiletypes', implode(',', $added), 'fileconverter_heic');
+    \fileconverter_heic\filetypes::install();
 
-    // Safe to enable now. The converter stays idle until a license key is saved.
+    // Safe to enable now. The converter stays idle until the site can convert.
     // The list of installed plugins is cached and does not include this one yet.
     \core_plugin_manager::reset_caches();
     \core\plugininfo\fileconverter::enable_plugin('heic', 1);
