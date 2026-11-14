@@ -14,7 +14,7 @@ The plugin decides by decoding a sample HEIC image, because many servers list th
 ## What it does
 
 - **Converts uploads as they arrive.** A .heic or .heif file becomes a .jpg the moment it is uploaded, before Moodle stores it. This covers everything that uses Moodle's file picker: assignment submissions, quiz essay attachments, forum, glossary and workshop attachments, and files added to a course. The original HEIC is not kept. If the image cannot be converted, the original is stored unchanged.
-- **Lets teachers convert HEIC images already in a course, where they see them.** A "Convert to .jpg" button appears beside each .heic image and file link that the viewer may convert: a forum attachment, a broken image on a page, a file in the assignment grader. The image or link switches to the JPEG without reloading the page. The button finds files by their address on the page, so it works in any activity, including ones Moodle adds later. Converting replaces the file with a JPEG and keeps its owner and dates. The original HEIC is not kept. Attachments are renamed to .jpg; images placed in text keep their name, because the text links to them by it. Submissions the assignment grader showed blank are queued to be rebuilt.
+- **Lets teachers convert HEIC images already in a course, where they see them.** A "Convert to .jpg" button appears beside each .heic image and file link that the viewer may convert: a forum attachment, an image on a page, a file in the assignment grader. An image the browser can't show is replaced by Moodle's red error box, "Cannot display .heic image", with the button below it. Pressing it swaps in the JPEG without reloading the page. People who can't convert the file see no button and no box. The button finds files by their address on the page, so it works in any activity, including ones Moodle adds later. Converting replaces the file with a JPEG and keeps its owner and dates. The original HEIC is not kept. Attachments are renamed to .jpg; images placed in text keep their name, because the text links to them by it. Submissions the assignment grader showed blank are queued to be rebuilt.
 - **Shows HEIC files already in Moodle in the assignment grader** ("Annotate PDF"). As a document converter, it hands Moodle a PDF of the photo, the same thing Moodle builds for a JPEG, and leaves the stored file untouched. It also offers JPG and WebP to any other code that asks Moodle's converter API.
 - **Opens the image-only upload points to HEIC.** The image button in the text editor, profile pictures, course images, and database picture fields refuse HEIC in plain Moodle. While this site can convert, they accept it and store a JPEG. If a conversion fails there, the upload is refused, as it would be without the plugin. An image added through the text editor keeps its .heic name, because the editor links to it by that name; the file itself is a JPEG and is served as one.
 - **Teaches Moodle the .heic and .heif file types**, so they count as image files in "Accepted file types".
@@ -55,7 +55,7 @@ Teachers who can't convert an assignment submission still see its photo in the a
 
 Converting uploads as they arrive needs no extra permission: it applies to whatever the person was already allowed to upload. Every conversion of a stored image is logged with who converted which file.
 
-After converting, browsers that recently tried to show the old HEIC may keep showing it broken for up to six hours, Moodle's cache time for files.
+The person who converts sees the JPEG at once. Images placed in text keep their address when converted, so other people's browsers that recently tried to show the old HEIC may keep showing it broken for up to six hours, Moodle's cache time for files. Renamed attachments get a new address and are not affected.
 
 ## Submissions made before the plugin was set up (command line)
 
@@ -82,6 +82,8 @@ $CFG->forced_plugin_settings['fileconverter_heic'] = [
     'cloudonly' => 1, // Skip server conversion, to test the cloud route.
 ];
 ```
+
+The browser script's source is `amd/src/inline.js`. `amd/build/inline.min.js` was written by hand from it, without Moodle's build tools. Run `grunt amd` from the Moodle root to rebuild it before a release.
 
 ## License
 

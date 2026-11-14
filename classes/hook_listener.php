@@ -142,7 +142,12 @@ class hook_listener {
             'filearea' => $file->get_filearea(),
             'filepath' => $file->get_filepath(),
             'filename' => $file->get_filename(),
-        ], $files))]);
+        ], $files)), [
+            'convert' => get_string('convertinline', 'fileconverter_heic'),
+            'converting' => get_string('converting', 'fileconverter_heic'),
+            // The script puts each image's alt text in place of {$a}.
+            'missing' => get_string('imagemissing', 'fileconverter_heic', '{$a}'),
+        ]]);
     }
 
     /**
