@@ -30,6 +30,7 @@ import Notification from 'core/notification';
 
 const SEEN = 'data-fileconverter-heic';
 const HIDDEN = 'data-fileconverter-heic-hidden';
+const FILE = 'data-fileconverter-heic-file';
 const SELECTOR = 'a[href*="pluginfile.php"], img[src*="pluginfile.php"]';
 
 let files = [];
@@ -89,7 +90,7 @@ const match = (parts) => {
         return undefined;
     }
     return files.find((file) => {
-        if (file.contextid !== parts.contextid || file.component !== parts.component ||
+        if (file.converted || file.contextid !== parts.contextid || file.component !== parts.component ||
                 file.filearea !== parts.filearea || file.filename !== parts.filename) {
             return false;
         }
@@ -121,13 +122,33 @@ const rename = (address, filename, fresh) => {
 };
 
 /**
+ * The links and images on the page that show a file.
+ *
+ * Looked up each time, because some parts of Moodle, such as the grader's file
+ * tree, rebuild their markup after the page loads.
+ *
+ * @param {object} file The file.
+ * @returns {HTMLElement[]}
+ */
+const elementsFor = (file) => [...document.querySelectorAll(SELECTOR)].filter((element) =>
+    match(parse(element.getAttribute(element.tagName === 'IMG' ? 'src' : 'href'))) === file);
+
+/**
+ * The selector for a file's button holders.
+ *
+ * @param {object} file The file.
+ * @returns {string}
+ */
+const holdersOf = (file) => `.fileconverter-heic[${FILE}="${file.id}"]`;
+
+/**
  * Points every link and image for a file at the converted .jpg.
  *
  * @param {object} file The converted file.
  * @param {string} filename Its new name.
  */
 const refresh = (file, filename) => {
-    file.elements.forEach((element) => {
+    elementsFor(file).forEach((element) => {
         if (element.tagName === 'IMG') {
             element.src = rename(element.getAttribute('src'), filename, true);
             if (element.hasAttribute(HIDDEN)) {
@@ -145,16 +166,18 @@ const refresh = (file, filename) => {
         }
     });
     file.filename = filename;
+    file.converted = true;
 };
 
 /**
  * Converts a file when its button is pressed.
  *
  * @param {object} file The file.
- * @param {HTMLButtonElement} button Its button.
- * @param {HTMLElement} status Where to say how it went.
+ * @param {HTMLElement} holder The pressed button's holder.
  */
-const convert = async(file, button, status) => {
+const convert = async(file, holder) => {
+    const button = holder.querySelector('button');
+    const status = holder.querySelector('[role="status"]');
     button.disabled = true;
     button.textContent = strings.converting;
     status.textContent = '';
@@ -173,7 +196,7 @@ const convert = async(file, button, status) => {
         }
         refresh(file, result.filename);
         // The image or link now shows the .jpg, which says enough.
-        file.button.remove();
+        document.querySelectorAll(holdersOf(file)).forEach((element) => element.remove());
     } catch (error) {
         button.disabled = false;
         button.textContent = strings.convert;
@@ -202,9 +225,9 @@ const markIfMissing = (image, file, holder) => {
         const alert = document.createElement('div');
         alert.className = 'alert alert-danger d-inline-block mb-2';
         alert.textContent = strings.missing.replace('{$a}', image.getAttribute('alt') || file.filename);
-        file.message = document.createElement('div');
-        file.message.append(alert);
-        holder.prepend(file.message);
+        const box = document.createElement('div');
+        box.append(alert);
+        holder.prepend(box);
     };
     if (image.complete) {
         mark();
@@ -221,8 +244,16 @@ const markIfMissing = (image, file, holder) => {
  */
 const addButton = (file, element) => {
     const isImage = element.tagName === 'IMG';
-    const holder = document.createElement(isImage ? 'div' : 'span');
-    holder.className = isImage ? 'fileconverter-heic my-2' : 'fileconverter-heic ms-2';
+    // Submitted files sit in Moodle's file tree, which is often wider than its column in the grader.
+    // Below the name, the button stays in view.
+    const ownLine = isImage || element.closest('.fileuploadsubmission, .ygtvhtml') !== null;
+    const holder = document.createElement(ownLine ? 'div' : 'span');
+    holder.setAttribute(FILE, file.id);
+    if (isImage) {
+        holder.className = 'fileconverter-heic my-2';
+    } else {
+        holder.className = ownLine ? 'fileconverter-heic my-1' : 'fileconverter-heic ms-2';
+    }
 
     const button = document.createElement('button');
     button.type = 'button';
@@ -233,7 +264,6 @@ const addButton = (file, element) => {
     status.className = 'small ms-2';
     status.setAttribute('role', 'status');
 
-    button.addEventListener('click', () => convert(file, button, status));
     holder.append(button, status);
     if (isImage) {
         markIfMissing(element, file, holder);
@@ -241,8 +271,8 @@ const addButton = (file, element) => {
 
     // An image inside a link goes after the link, so the button is not part of it.
     const anchor = isImage && element.parentElement.closest('a') ? element.parentElement.closest('a') : element;
-    anchor.after(holder);
-    file.button = holder;
+    // The space lets the button wrap below a file name in a narrow column, such as the grader's.
+    anchor.after(' ', holder);
 };
 
 /**
@@ -261,8 +291,7 @@ const scan = () => {
         if (!file) {
             return;
         }
-        file.elements.push(element);
-        if (!file.button) {
+        if (!document.querySelector(holdersOf(file))) {
             addButton(file, element);
         }
     });
@@ -275,9 +304,21 @@ const scan = () => {
  * @param {object} words The button and alt text wording: convert, converting, missing.
  */
 export const init = (convertible, words) => {
-    files = convertible.map((file) => ({...file, elements: [], button: null, message: null}));
+    files = convertible.map((file) => ({...file, converted: false}));
     strings = words;
     scan();
+
+    // One listener for every button. Moodle's file tree copies its markup, which drops listeners on the button itself.
+    document.addEventListener('click', (event) => {
+        const holder = event.target.closest('.fileconverter-heic');
+        if (!holder || !event.target.closest('button')) {
+            return;
+        }
+        const file = files.find((candidate) => String(candidate.id) === holder.getAttribute(FILE));
+        if (file && !file.converted) {
+            convert(file, holder);
+        }
+    });
 
     let queued = false;
     new MutationObserver(() => {
@@ -285,9 +326,10 @@ export const init = (convertible, words) => {
             return;
         }
         queued = true;
-        window.requestAnimationFrame(() => {
+        // A timer rather than an animation frame, which browsers pause in background tabs.
+        window.setTimeout(() => {
             queued = false;
             scan();
-        });
+        }, 50);
     }).observe(document.body, {childList: true, subtree: true});
 };
