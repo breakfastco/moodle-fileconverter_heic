@@ -24,6 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['activitynotice'] = '{$a->count} .heic image(s) in this activity can\'t be opened in most browsers. <a href="{$a->url}">Convert them to .jpg</a>';
 $string['cachedef_credits'] = 'License status and remaining conversion credits';
 $string['cachedef_server'] = 'Whether this server can convert HEIC images itself';
 $string['cantconvert'] = 'Conversion';

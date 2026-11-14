@@ -110,6 +110,39 @@ class hook_listener {
     }
 
     /**
+     * Tells people who may convert that an activity holds HEIC images, on that activity's pages.
+     *
+     * @param \core\hook\output\before_http_headers $hook The page about to be sent.
+     */
+    public static function activity_notice(\core\hook\output\before_http_headers $hook): void {
+        global $PAGE;
+
+        if (during_initial_install() || !isloggedin() || isguestuser() || CLI_SCRIPT || AJAX_SCRIPT) {
+            return;
+        }
+        // Only full pages that show notices. Anything else would carry it to the next page.
+        if (!in_array($PAGE->pagelayout, ['incourse', 'standard', 'report', 'admin'], true)) {
+            return;
+        }
+        $context = $PAGE->context;
+        if (!$context instanceof \context_module || str_starts_with($PAGE->pagetype, 'files-converter-heic')) {
+            return;
+        }
+        if (!has_capability('fileconverter/heic:convert', $context) || !image_converter::is_ready()) {
+            return;
+        }
+        $count = stored_images::count_in($context);
+        if (!$count) {
+            return;
+        }
+        $url = new \moodle_url('/files/converter/heic/convert.php', ['contextid' => $context->id]);
+        \core\notification::info(get_string('activitynotice', 'fileconverter_heic', (object) [
+            'count' => $count,
+            'url' => $url->out(),
+        ]));
+    }
+
+    /**
      * A .jpg file name that is free in the folder the upload is going to.
      *
      * @param  \stdClass $record The file record being stored.

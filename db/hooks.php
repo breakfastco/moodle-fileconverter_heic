@@ -31,4 +31,8 @@ $callbacks = [
         // Ahead of Moodle's own handler, which strips location data from JPEGs, so it sees the converted image.
         'priority' => 100,
     ],
+    [
+        'hook' => \core\hook\output\before_http_headers::class,
+        'callback' => [\fileconverter_heic\hook_listener::class, 'activity_notice'],
+    ],
 ];
