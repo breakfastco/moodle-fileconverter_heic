@@ -1,6 +1,6 @@
 # HEIC Support
 
-Moodle plugin. Creates .jpg copies of raw iPhone .heic and .heif images when they are uploaded.
+Moodle plugin. Converts raw iPhone .heic and .heif images to .jpg during uploads.
 
 ## Features
 
