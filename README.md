@@ -1,32 +1,31 @@
-# HEIC Support for Moodle
+# HEIC Support
 
-`fileconverter_heic` makes iPhone photos (.heic and .heif) work in Moodle.
+Moodle plugin. Creates .jpg copies of raw iPhone .heic and .heif images when they are uploaded.
 
-Moodle has no support for HEIC. A student who submits a photo straight from an iPhone gives the teacher a blank page in the assignment grader and a file most computers cannot open. Forum posts, quiz answers, and course files show a download link where a photo should be.
+## Features
 
-## Free on servers that can convert, cloud for the rest
+- **Teaches Moodle the .heic and .heif file types**, so they count as "Accepted file types".
+- **Converts uploads as they arrive.** A .heic or .heif file becomes a .jpg the moment it is uploaded, before Moodle stores it. 
+- **Lets teachers convert HEIC images already uploaded.** A "Convert to .jpg" button appears beside each .heic image and file link that the viewer may convert: a forum attachment, an image on a page, a file in the assignment grader.
+- **Shows the server's ImageMagick version**, or the cloud settings and remaining credits when the server cannot convert.
 
-- **On this server, free.** When PHP has the Imagick extension and ImageMagick was built with libheif, images are converted on the Moodle server. No license key, no credits.
-- **In the cloud, with credits.** When the server cannot read HEIC, images can be sent to the Breakfast cloud conversion service. One credit converts one image. A server that can convert never uses the cloud.
+## Free forever on most servers
 
-The plugin decides by decoding a sample HEIC image, because many servers list the format and still cannot read it.
+- **Most web hosts support free conversion.** When PHP has the Imagick extension and ImageMagick was built with libheif, images are converted by this plugin on the Moodle server for free.
+- **In the cloud, with credits.** When the server cannot read HEIC, images can be sent to the Cloud Conversion server. One credit converts one image.
 
-## What it does
+## Where to see it
 
-- **Converts uploads as they arrive.** A .heic or .heif file becomes a .jpg the moment it is uploaded, before Moodle stores it. This covers everything that uses Moodle's file picker: assignment submissions, quiz essay attachments, forum, glossary and workshop attachments, and files added to a course. The original HEIC is not kept. If the image cannot be converted, the original is stored unchanged.
-- **Lets teachers convert HEIC images already in a course, where they see them.** A "Convert to .jpg" button appears beside each .heic image and file link that the viewer may convert: a forum attachment, an image on a page, a file in the assignment grader. An image the browser can't show is replaced by Moodle's red error box, "Cannot display .heic image", with the button below it. Pressing it swaps in the JPEG without reloading the page. People who can't convert the file see no button and no box. The button finds files by their address on the page, so it works in any activity, including ones Moodle adds later. Converting replaces the file with a JPEG and keeps its owner and dates. The original HEIC is not kept. Attachments are renamed to .jpg; images placed in text keep their name, because the text links to them by it. In lists of submitted files, such as the assignment grader's, the button sits on its own line under the file name. Submissions the assignment grader showed blank are queued to be rebuilt.
-- **Shows HEIC files already in Moodle in the assignment grader** ("Annotate PDF"). As a document converter, it hands Moodle a PDF of the photo, the same thing Moodle builds for a JPEG, and leaves the stored file untouched. It also offers JPG and WebP to any other code that asks Moodle's converter API.
-- **Opens the image-only upload points to HEIC.** The image button in the text editor, profile pictures, course images, and database picture fields refuse HEIC in plain Moodle. While this site can convert, they accept it and store a JPEG. If a conversion fails there, the upload is refused, as it would be without the plugin. An image added through the text editor keeps its .heic name, because the editor links to it by that name; the file itself is a JPEG and is served as one.
-- **Teaches Moodle the .heic and .heif file types**, so they count as image files in "Accepted file types".
-- Shows the server's ImageMagick version, or the cloud settings and remaining credits when the server cannot convert.
-
-Moodle stores each document-converter result against the file's content, so the same stored image is never converted twice.
+- **Uploads:** anywhere people upload with Moodle's file picker, such as assignment submissions, quiz essay attachments, forum posts and course files. The .jpg is stored instead of the .heic. An image that cannot be converted is stored unchanged.
+- **Image-only uploads:** the text editor's Image button, profile pictures and course images refuse .heic in plain Moodle. While the site can convert, they accept it and store a .jpg.
+- **Convert to .jpg button:** beside .heic images and file links already in Moodle, such as images on a page, forum attachments and files in the assignment grader. Only people allowed to edit the file see it. Above an image the browser cannot show, a red box reads "Cannot display .heic image". Each conversion is recorded in Moodle's logs (Reports → Logs) as "HEIC image converted".
+- **Assignment grader:** with Annotate PDF feedback, a .heic submission shows as a photo teachers can mark up. The student's file is not changed.
+- **Settings:** Site administration → Plugins → Document converters → HEIC Support.
 
 ## Requirements
 
 - Moodle 4.5 or later. Tested on Moodle 4.5.16 and 5.3.1, with PostgreSQL 17 and MySQL 8.4.
 - Either PHP Imagick with HEIC support on the Moodle server, or a license key with conversion credits.
-- Ghostscript configured in Moodle, as the assignment grader already requires.
 - For cloud conversion only: outbound HTTPS from the Moodle server to `breakfastco.xyz` and `heic.breakfastco.xyz`.
 
 ## Install
@@ -37,56 +36,6 @@ Moodle stores each document-converter result against the file's content, so the 
 
 The converter is enabled at install. It stays idle only when the server cannot convert and cloud conversion is not switched on.
 
-## Permissions
-
-HEIC Support adds no permissions of its own. Converting a stored image replaces it, so it takes the permission Moodle already uses to edit the thing the image belongs to:
-
-| Where the image is | Permission |
-| --- | --- |
-| Assignment submission | Edit another user's submission (`mod/assign:editothersubmission`). Moodle gives this to managers only by default. |
-| Forum post | Edit any post (`mod/forum:editanypost`) |
-| Glossary entry | Manage entries (`mod/glossary:manageentries`) |
-| Database entry | Manage entries (`mod/data:manageentries`) |
-| Quiz answer, workshop submission | Nobody. Moodle lets nobody edit these after they are submitted. |
-| An activity's own content, such as a page or file | Manage activities (`moodle/course:manageactivities`) |
-| Course summary or section | Update course settings (`moodle/course:update`) |
-
-Teachers who can't convert an assignment submission still see its photo in the assignment grader, which shows a converted copy and never changes the student's file.
-
-Converting uploads as they arrive needs no extra permission: it applies to whatever the person was already allowed to upload. Every conversion of a stored image is logged with who converted which file.
-
-The person who converts sees the JPEG at once. Images placed in text keep their address when converted, so other people's browsers that recently tried to show the old HEIC may keep showing it broken for up to six hours, Moodle's cache time for files. Renamed attachments get a new address and are not affected.
-
-## Submissions made before the plugin was set up (command line)
-
-Moodle keeps the blank page it built when a conversion failed. To retry those submissions:
-
-```bash
-php files/converter/heic/cli/retry_failed.php
-```
-
-That lists them. Add `--run` to discard the blank pages and queue each submission for cron. Images converted in the cloud use one credit each.
-
 ## Privacy
 
 When cloud conversion is used, image contents, the file name, and the site address are sent to the conversion service. Nothing leaves the server when it converts images itself. The plugin stores no personal data in Moodle. This is declared through Moodle's privacy API.
-
-## Development
-
-The store and conversion server addresses can be overridden in `config.php`:
-
-```php
-$CFG->forced_plugin_settings['fileconverter_heic'] = [
-    'storeurl' => 'http://localhost:8766',
-    'converturl' => 'http://localhost:8766/v1',
-    'cloudonly' => 1, // Skip server conversion, to test the cloud route.
-];
-```
-
-The browser script's source is `amd/src/inline.js`. After changing it, rebuild `amd/build/` with Moodle's tools: run `npx grunt amd` from the plugin folder inside a Moodle checkout that has its Node packages installed (Node 22 for Moodle 5.x).
-
-The plugin is checked with [moodle-plugin-ci](https://moodlehq.github.io/moodle-plugin-ci/), as Moodle's reviewers do: `phplint`, `phpcs --max-warnings 0`, `phpdoc`, `validate`, `savepoints` and `grunt --max-lint-warnings 0` all pass.
-
-## License
-
-GNU GPL v3 or later.
