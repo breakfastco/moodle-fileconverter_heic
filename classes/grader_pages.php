@@ -44,10 +44,9 @@ class grader_pages {
      *
      * @param  \assign    $assign     The assignment.
      * @param  \stdClass  $submission The submission record.
-     * @param  bool       $apply      False to only report whether the submission needs it.
      * @return bool Whether the submission had pages to rebuild.
      */
-    public static function rebuild_if_failed(\assign $assign, \stdClass $submission, bool $apply = true): bool {
+    public static function rebuild_if_failed(\assign $assign, \stdClass $submission): bool {
         if (!self::available()) {
             return false;
         }
@@ -84,16 +83,14 @@ class grader_pages {
                 continue;
             }
             $affected = true;
-            if ($apply) {
-                foreach ($sets as [$areas, $itemid]) {
-                    foreach ($areas as $area) {
-                        $fs->delete_area_files($contextid, 'assignfeedback_editpdf', $area, $itemid);
-                    }
+            foreach ($sets as [$areas, $itemid]) {
+                foreach ($areas as $area) {
+                    $fs->delete_area_files($contextid, 'assignfeedback_editpdf', $area, $itemid);
                 }
             }
         }
 
-        if ($affected && $apply) {
+        if ($affected) {
             self::queue($submission);
         }
         return $affected;
@@ -133,7 +130,7 @@ class grader_pages {
      *
      * @param \stdClass $submission The submission record.
      */
-    public static function queue(\stdClass $submission): void {
+    protected static function queue(\stdClass $submission): void {
         $task = new \assignfeedback_editpdf\task\convert_submission();
         $task->set_custom_data([
             'submissionid' => $submission->id,
