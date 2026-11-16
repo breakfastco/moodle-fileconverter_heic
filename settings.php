@@ -63,15 +63,6 @@ if ($hassiteconfig) {
     }
 
     if (!$local || api::license_key() !== '') {
-        $licensekey = new admin_setting_configpasswordunmask(
-            'fileconverter_heic/licensekey',
-            get_string('licensekey', 'fileconverter_heic'),
-            get_string('licensekey_desc', 'fileconverter_heic'),
-            ''
-        );
-        $licensekey->set_updatedcallback('\fileconverter_heic\api::settings_updated');
-        $settings->add($licensekey);
-
         $cloudenabled = new admin_setting_configcheckbox(
             'fileconverter_heic/cloudenabled',
             get_string('cloudenabled', 'fileconverter_heic'),
@@ -80,6 +71,16 @@ if ($hassiteconfig) {
         );
         $cloudenabled->set_updatedcallback('\fileconverter_heic\api::settings_updated');
         $settings->add($cloudenabled);
+
+        // The key sits just above its status.
+        $licensekey = new admin_setting_configpasswordunmask(
+            'fileconverter_heic/licensekey',
+            get_string('licensekey', 'fileconverter_heic'),
+            get_string('licensekey_desc', 'fileconverter_heic'),
+            ''
+        );
+        $licensekey->set_updatedcallback('\fileconverter_heic\api::settings_updated');
+        $settings->add($licensekey);
 
         // Ask the license server only when this page itself is on screen, not for every admin page or search.
         if ($onscreen && api::license_key() !== '') {
