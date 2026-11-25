@@ -68,8 +68,10 @@ class hook_listener {
             debugging('fileconverter_heic: ' . $e->getMessage() . $detail, DEBUG_NORMAL);
             if (self::picker_wants_web_images_only()) {
                 // An unconverted HEIC is a broken image here. Refuse it, as Moodle does without this plugin.
+                // The file picker's own message for this is deprecated in Moodle 5.3, and its replacement
+                // does not exist in 4.5, so this uses the general one both versions have.
                 $type = get_mimetype_description(['filename' => $record->filename]);
-                throw new \moodle_exception('invalidfiletype', 'repository', '', $type);
+                throw new \moodle_exception('invalidfiletype', 'error', '', $type);
             }
             return;
         }
