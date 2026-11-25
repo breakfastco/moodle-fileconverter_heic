@@ -36,6 +36,10 @@ Moodle plugin. Converts raw iPhone .heic and .heif images to .jpg during uploads
 
 The converter is enabled at install. It stays idle only when the server cannot convert and cloud conversion is not switched on.
 
+## Cloud Conversion
+
+Optional. Servers that can’t convert HEIC themselves can use the HEIC Support Cloud Conversion service from Breakfast Company. One credit converts one image. License keys and remaining credits are checked at breakfastco.xyz. Without a license key and credits, a server that can’t convert does nothing: .heic uploads are stored as they are, the Convert to .jpg button doesn’t appear, and the assignment grader can’t show HEIC submissions. A server that can convert never uses the cloud and needs no key.
+
 ## Privacy
 
-When cloud conversion is used, image contents, the file name, and the site address are sent to the conversion service. Nothing leaves the server when it converts images itself. The plugin stores no personal data in Moodle. This is declared through Moodle's privacy API.
+When Cloud Conversion is used, image contents, the file name, and the site address are sent to the conversion service at breakfastco.xyz. Nothing leaves the server when it converts images itself. The plugin stores no personal data in Moodle. This is declared through Moodle's privacy API.
