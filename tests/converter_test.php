@@ -18,6 +18,7 @@ namespace fileconverter_heic;
 
 use core_files\conversion;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(converter::class)]
 /**
  * Tests for the document converter Moodle calls, such as for the assignment grader's pages.
  *
@@ -26,7 +27,6 @@ use core_files\conversion;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \fileconverter_heic\converter
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(converter::class)]
 final class converter_test extends \advanced_testcase {
     /**
      * Stores the sample HEIC and starts a conversion of it.

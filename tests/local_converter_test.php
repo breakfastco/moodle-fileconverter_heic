@@ -16,6 +16,8 @@
 
 namespace fileconverter_heic;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(local_converter::class)]
+#[\PHPUnit\Framework\Attributes\CoversClass(image_converter::class)]
 /**
  * Tests for converting on this server and choosing between this server and the cloud.
  *
@@ -27,8 +29,6 @@ namespace fileconverter_heic;
  * @covers    \fileconverter_heic\local_converter
  * @covers    \fileconverter_heic\image_converter
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(local_converter::class)]
-#[\PHPUnit\Framework\Attributes\CoversClass(image_converter::class)]
 final class local_converter_test extends \advanced_testcase {
     /** @var string The sample image shipped with the plugin. */
     const SAMPLE = __DIR__ . '/../samples/sample.heic';

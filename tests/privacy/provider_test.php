@@ -19,6 +19,7 @@ namespace fileconverter_heic\privacy;
 use core_privacy\local\metadata\collection;
 use core_privacy\local\metadata\types\external_location;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(provider::class)]
 /**
  * Tests for the privacy declaration.
  *
@@ -27,7 +28,6 @@ use core_privacy\local\metadata\types\external_location;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \fileconverter_heic\privacy\provider
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(provider::class)]
 final class provider_test extends \core_privacy\tests\provider_testcase {
     /**
      * What cloud conversion sends is declared.

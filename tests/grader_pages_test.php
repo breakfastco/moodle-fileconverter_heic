@@ -23,6 +23,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
+#[\PHPUnit\Framework\Attributes\CoversClass(grader_pages::class)]
 /**
  * Tests for rebuilding the assignment grader's pages for submissions it could not show.
  *
@@ -31,7 +32,6 @@ require_once($CFG->dirroot . '/mod/assign/locallib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \fileconverter_heic\grader_pages
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(grader_pages::class)]
 final class grader_pages_test extends \advanced_testcase {
     /** @var \assign The assignment. */
     protected \assign $assign;

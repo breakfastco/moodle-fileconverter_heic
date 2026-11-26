@@ -16,6 +16,7 @@
 
 namespace fileconverter_heic;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(filetypes::class)]
 /**
  * Tests for the .heic and .heif file types the plugin adds to Moodle.
  *
@@ -24,7 +25,6 @@ namespace fileconverter_heic;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \fileconverter_heic\filetypes
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(filetypes::class)]
 final class filetypes_test extends \advanced_testcase {
     /**
      * The groups a file type is in.

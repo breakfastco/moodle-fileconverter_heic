@@ -20,6 +20,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once(__DIR__ . '/fixtures/testable_api.php');
 
+#[\PHPUnit\Framework\Attributes\CoversClass(api::class)]
 /**
  * Tests for the cloud conversion client. No request leaves the test.
  *
@@ -28,7 +29,6 @@ require_once(__DIR__ . '/fixtures/testable_api.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \fileconverter_heic\api
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(api::class)]
 final class api_test extends \advanced_testcase {
     /**
      * Saves a license key and switches cloud conversion on.

@@ -16,6 +16,7 @@
 
 namespace fileconverter_heic;
 
+#[\PHPUnit\Framework\Attributes\CoversClass(hook_listener::class)]
 /**
  * Tests for converting uploads as they arrive.
  *
@@ -26,7 +27,6 @@ namespace fileconverter_heic;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @covers    \fileconverter_heic\hook_listener
  */
-#[\PHPUnit\Framework\Attributes\CoversClass(hook_listener::class)]
 final class hook_listener_test extends \advanced_testcase {
     /** @var string The sample image shipped with the plugin. */
     const SAMPLE = __DIR__ . '/../samples/sample.heic';
